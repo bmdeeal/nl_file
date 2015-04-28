@@ -33,8 +33,7 @@
 */
 
 //it works!
-//todo: error handling of some kind, this doesn't really handle things like full disk or disk removed, etc
-//also, it doesn't check if the file exists when loading
+//dunno what else to add at the momemnt, basic error handling implemented
 
 using namespace std;
 
@@ -47,7 +46,7 @@ int nl_File::save() {
 	out_file.open(filename.c_str());
 	//if there's ANY issue at all, abort
 	if (!out_file.good()) {
-		cout << "error opening \"" << filename << "\"!\n";
+		cerr << "\nerror writing \"" << filename << "\"!\n";
 		out_file.close();
 		return 0;
 	}
@@ -61,12 +60,17 @@ int nl_File::save() {
 	return 1;
 }
 //load -- read file from disk
-//todo: check if there are any issues reading that aren't EOF
 int nl_File::load() {
+	int result = 1; //report if there's an issue
 	ifstream in_file; //file to read
 	string temp; //temporary string to load to
 	//open the file for reading
 	in_file.open(filename.c_str());
+	//if the file isn't found/can't be loaded
+	if (!in_file.good()) {
+		cerr << "\nerror loading \"" << filename << "\"!\n";
+		return 0;
+	}
 	//empty anything that was previously loaded
 	data.clear();
 	//load each line in
@@ -77,7 +81,7 @@ int nl_File::load() {
 	}
 	//and we're done
 	in_file.close();
-	return 1;
+	return result;
 }
 //constructors -- they don't need to do much in the slightest
 nl_File::nl_File() {
@@ -92,8 +96,9 @@ nl_File::nl_File(const char *f) {
 int main() {
 	nl_File test_file ("test.txt");
 	cout << "load\n";
-	test_file.load();
+	if (!test_file.load()) { return 1;}
 	test_file.data[2]="asdf!";
 	cout << "save\n";
 	test_file.save();
+	return 0;
 }
